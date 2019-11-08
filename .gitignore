@@ -18,3 +18,21 @@ Calculator/.vs/Calculator/v14/
 *.xml
 
 *.cproj
+
+*.eep
+
+*.elf
+
+*.hex
+
+*.lss
+
+*.map
+
+*.d
+
+*.o
+
+*.mk
+
+Calculator/Debug/

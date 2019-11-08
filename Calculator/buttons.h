@@ -17,10 +17,13 @@
 // SwitchState Management
 uint8_t plusState= 0;
 uint8_t prevPlusState= 0;  // 0 = offen, 1 = gedrückt
+
 uint8_t minusState= 0;
 uint8_t prevMinusState= 0;  // 0 = offen, 1 = gedrückt
+
 uint8_t enterState= 0;
 uint8_t prevEnterState= 0;  // 0 = offen, 1 = gedrückt
+
 uint8_t clearState= 0;
 uint8_t prevClearState= 0;  // 0 = offen, 1 = gedrückt
 
@@ -46,8 +49,8 @@ void GetPlusButton()
 
 void GetMinusButton()
 {
-  prevPlusState= plusState;
-  if(( PORTF.IN & PLUS_BUTTON_MASK)== 0)
+  prevMinusState= minusState;
+  if(( PORTF.IN & MINUS_BUTTON_MASK)== 0)
   {
     minusState= 1;
   }
@@ -58,8 +61,8 @@ void GetMinusButton()
 }
 void GetEnterButton()
 {
-  prevEnterState= plusState;
-  if(( PORTF.IN & PLUS_BUTTON_MASK)== 0)
+  prevEnterState= enterState;
+  if(( PORTF.IN & ENTER_BUTTON_MASK)== 0)
   {
     enterState= 1;
   }
@@ -70,8 +73,8 @@ void GetEnterButton()
 }
 void GetClearButton()
 {
-  prevPlusState= plusState;
-  if(( PORTF.IN & PLUS_BUTTON_MASK)== 0)
+  prevClearState= clearState;
+  if(( PORTF.IN & CLEAR_BUTTON_MASK)== 0)
   {
     clearState= 1;
   }
@@ -93,15 +96,14 @@ bool DetectPlusButtonSwitch()
     {
       switchDetected=true;
     }
-    
-  }
+    }
   return switchDetected;
 }
 // DETEKTIERE OB KNOPF «MINUS» GEDRÜCKT WURDE:
 bool DetectMinusButtonSwitch()
 {
   bool switchDetected=false;
-  GetPlusButton();
+  GetMinusButton();
   
   if( prevMinusState== 0)
   {

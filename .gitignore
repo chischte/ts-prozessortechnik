@@ -10,3 +10,11 @@ ts-prozessortechnik.atsln
 Semesterarbeit/Semesterarbeit.componentinfo.xml
 
 Semesterarbeit/Semesterarbeit.cproj
+
+Calculator/.vs/Calculator/v14/
+
+*.atsln
+
+*.xml
+
+*.cproj

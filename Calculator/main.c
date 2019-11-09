@@ -38,20 +38,23 @@ int main( void)
   {
     if(DetectPlusButtonSwitch())
     {
-      Counter++;
+      WriteNumberToLcd( 0, 1, 1);
     }
+    
     if(DetectMinusButtonSwitch())
     {
-      Counter++;
+      WriteNumberToLcd( 1, 2, 1);
     }
+    
     if(DetectEnterButtonSwitch())
     {
-      Counter++;
+      WriteNumberToLcd( 2, 3, 1);
     }
+    
     if(DetectClearButtonSwitch())
     {
-      Counter++;
+      WriteNumberToLcd( 3, 4, 1);
     }
-    SetCounter();
-    }
-}
+    
+  }//END OF LOOP
+}// END OF MAIN

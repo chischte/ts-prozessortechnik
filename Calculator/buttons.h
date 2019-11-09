@@ -14,25 +14,23 @@
 #define ENTER_BUTTON_MASK  0b01000000
 #define CLEAR_BUTTON_MASK  0b10000000
 
-// SwitchState Management
+// MONITOR SWITCH STATES:
 uint8_t plusState= 0;
-uint8_t prevPlusState= 0;  // 0 = offen, 1 = gedrückt
+uint8_t prevPlusState= 0;  // 1 = pushed
 
 uint8_t minusState= 0;
-uint8_t prevMinusState= 0;  // 0 = offen, 1 = gedrückt
-
+uint8_t prevMinusState= 0;
 uint8_t enterState= 0;
-uint8_t prevEnterState= 0;  // 0 = offen, 1 = gedrückt
+uint8_t prevEnterState= 0;
 
 uint8_t clearState= 0;
-uint8_t prevClearState= 0;  // 0 = offen, 1 = gedrückt
+uint8_t prevClearState= 0;
 
 
 void InitButtonPort()
 {
   PORTF.DIRCLR= PLUS_BUTTON_MASK+MINUS_BUTTON_MASK+ENTER_BUTTON_MASK+CLEAR_BUTTON_MASK;
 }
-
 
 void GetPlusButton()
 {
@@ -46,7 +44,6 @@ void GetPlusButton()
     plusState= 0;
   }
 }
-
 void GetMinusButton()
 {
   prevMinusState= minusState;
@@ -96,7 +93,7 @@ bool DetectPlusButtonSwitch()
     {
       switchDetected=true;
     }
-    }
+  }
   return switchDetected;
 }
 // DETEKTIERE OB KNOPF «MINUS» GEDRÜCKT WURDE:

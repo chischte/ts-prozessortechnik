@@ -14,11 +14,6 @@
 #define DISP_RS_MASK   0b00000001
 #define DISP_DATA_MASK 0b11110000
 
-// Counter Management
-int16_t Counter= 0;
-int16_t OldCounter= -1; // Sonst wird bei Start die 0 nicht ausgegeben
-
-
 void InitDisplayPort()
 {
   PORTD.DIRSET= DISP_RS_MASK + DISP_RW_MASK + DISP_EN_MASK;
@@ -141,17 +136,5 @@ void WriteNumberToLcd( int8_t position, int16_t number, int8_t width)
     numberTextPtr++;
   }
 }
-
-void SetCounter()
-{
-  // Die Zahl auf dem Display nur aktualisieren,
-  // wenn sie sich ge?ndert hat.
-  if( Counter!= OldCounter)
-  {
-    WriteNumberToLcd( 0xE, Counter, 6);
-    OldCounter= Counter;
-  }
-}
-//////// LCD Funktionen - Ende
 
 #endif /* DISPLAY_H_ */

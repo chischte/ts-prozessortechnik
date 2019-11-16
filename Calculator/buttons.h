@@ -20,129 +20,133 @@ uint8_t prevPlusState= 0;  // 1 = pushed
 
 uint8_t minusState= 0;
 uint8_t prevMinusState= 0;
+
 uint8_t enterState= 0;
 uint8_t prevEnterState= 0;
 
 uint8_t clearState= 0;
 uint8_t prevClearState= 0;
 
-
 void InitButtonPort()
 {
-  PORTF.DIRCLR= PLUS_BUTTON_MASK+MINUS_BUTTON_MASK+ENTER_BUTTON_MASK+CLEAR_BUTTON_MASK;
+	PORTF.DIRCLR= PLUS_BUTTON_MASK+MINUS_BUTTON_MASK+ENTER_BUTTON_MASK+CLEAR_BUTTON_MASK;
 }
 
+// AUSLESEN DER MOMENTANEN TASTER ZUSTÄNDE:
 void GetPlusButton()
 {
-  prevPlusState= plusState;
-  if(( PORTF.IN & PLUS_BUTTON_MASK)== 0)
-  {
-    plusState= 1;
-  }
-  else
-  {
-    plusState= 0;
-  }
+	prevPlusState= plusState;
+	if(( PORTF.IN & PLUS_BUTTON_MASK)== 0)
+	{
+		plusState= 1;
+	}
+	else
+	{
+		plusState= 0;
+	}
 }
 void GetMinusButton()
 {
-  prevMinusState= minusState;
-  if(( PORTF.IN & MINUS_BUTTON_MASK)== 0)
-  {
-    minusState= 1;
-  }
-  else
-  {
-    minusState= 0;
-  }
+	prevMinusState= minusState;
+	if(( PORTF.IN & MINUS_BUTTON_MASK)== 0)
+	{
+		minusState= 1;
+	}
+	else
+	{
+		minusState= 0;
+	}
 }
 void GetEnterButton()
 {
-  prevEnterState= enterState;
-  if(( PORTF.IN & ENTER_BUTTON_MASK)== 0)
-  {
-    enterState= 1;
-  }
-  else
-  {
-    enterState= 0;
-  }
+	prevEnterState= enterState;
+	if(( PORTF.IN & ENTER_BUTTON_MASK)== 0)
+	{
+		enterState= 1;
+	}
+	else
+	{
+		enterState= 0;
+	}
 }
 void GetClearButton()
 {
-  prevClearState= clearState;
-  if(( PORTF.IN & CLEAR_BUTTON_MASK)== 0)
-  {
-    clearState= 1;
-  }
-  else
-  {
-    clearState= 0;
-  }
+	prevClearState= clearState;
+	if(( PORTF.IN & CLEAR_BUTTON_MASK)== 0)
+	{
+		clearState= 1;
+	}
+	else
+	{
+		clearState= 0;
+	}
 }
 
 // DETEKTIERE OB KNOPF «PLUS» GEDRÜCKT WURDE:
 bool DetectPlusButtonSwitch()
 {
-  bool switchDetected=false;
-  GetPlusButton();
-  
-  if( prevPlusState== 0)
-  {
-    if( plusState == 1)
-    {
-      switchDetected=true;
-    }
-  }
-  return switchDetected;
+	bool switchDetected=false;
+	GetPlusButton();
+	
+	if( prevPlusState== 0)
+	{
+		if( plusState == 1)
+		{
+			switchDetected=true;
+		}
+	}
+	return switchDetected;
 }
+
 // DETEKTIERE OB KNOPF «MINUS» GEDRÜCKT WURDE:
 bool DetectMinusButtonSwitch()
 {
-  bool switchDetected=false;
-  GetMinusButton();
-  
-  if( prevMinusState== 0)
-  {
-    if( minusState == 1)
-    {
-      switchDetected=true;
-    }
-    
-  }
-  return switchDetected;
+	bool switchDetected=false;
+	GetMinusButton();
+	
+	if( prevMinusState== 0)
+	{
+		if( minusState == 1)
+		{
+			switchDetected=true;
+		}
+		
+	}
+	return switchDetected;
 }
+
 // DETEKTIERE OB KNOPF «ENTER» GEDRÜCKT WURDE:
 bool DetectEnterButtonSwitch()
 {
-  bool switchDetected=false;
-  GetEnterButton();
-  
-  if( prevEnterState== 0)
-  {
-    if( enterState == 1)
-    {
-      switchDetected=true;
-    }
-    
-  }
-  return switchDetected;
+	bool switchDetected=false;
+	GetEnterButton();
+	
+	if( prevEnterState== 0)
+	{
+		if( enterState == 1)
+		{
+			switchDetected=true;
+		}
+		
+	}
+	return switchDetected;
 }
+
 // DETEKTIERE OB KNOPF «CLEAR» GEDRÜCKT WURDE:
 bool DetectClearButtonSwitch()
 {
-  bool switchDetected=false;
-  GetClearButton();
-  
-  if( prevClearState== 0)
-  {
-    if( clearState == 1)
-    {
-      switchDetected=true;
-    }
-    
-  }
-  return switchDetected;
+	bool switchDetected=false;
+	GetClearButton();
+	
+	if( prevClearState== 0)
+	{
+		if( clearState == 1)
+		{
+			switchDetected=true;
+		}
+		
+	}
+	return switchDetected;
 }
 
 #endif

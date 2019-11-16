@@ -24,37 +24,41 @@
 
 int main( void)
 {
-  // **************************************************************************
-  // SETUP
-  // **************************************************************************
-  InitButtonPort();
-  InitDisplayPort();
-  InitLcd();
-  
-  // **************************************************************************
-  // LOOP
-  // **************************************************************************
-  while(1)
-  {
-    if(DetectPlusButtonSwitch())
-    {
-      WriteNumberToLcd( 0, 1, 1);
-    }
-    
-    if(DetectMinusButtonSwitch())
-    {
-      WriteNumberToLcd( 1, 2, 1);
-    }
-    
-    if(DetectEnterButtonSwitch())
-    {
-      WriteNumberToLcd( 2, 3, 1);
-    }
-    
-    if(DetectClearButtonSwitch())
-    {
-      WriteNumberToLcd( 3, 4, 1);
-    }
-    
-  }//END OF LOOP
+	// **************************************************************************
+	// SETUP
+	// **************************************************************************
+	InitButtonPort();
+	InitDisplayPort();
+	InitLcd();
+	
+	// **************************************************************************
+	// LOOP
+	// **************************************************************************
+	while(1)
+	{
+		// DRUCK AUF «PLUS» SCHREIBT EINE 1 IN FELD (0,0):
+		if(DetectPlusButtonSwitch())
+		{
+			WriteNumberToLcd( 0, 1, 1);
+		}
+		
+		// DRUCK AUF «MINUS» SCHREIBT EINE 2 IN FELD (1,0):
+		if(DetectMinusButtonSwitch())
+		{
+			WriteNumberToLcd( 1, 2, 1);
+		}
+		
+		// DRUCK AUD «ENTER» SCHREIBT EINE 3 IN FELD (2,0):
+		if(DetectEnterButtonSwitch())
+		{
+			WriteNumberToLcd( 2, 3, 1);
+		}
+		
+		// DRUCK AUF «CLEAR SCHREIBT EINE 4 IN FELD (3,0);
+		if(DetectClearButtonSwitch())
+		{
+			WriteNumberToLcd( 3, 4, 1);
+		}
+		
+	}//END OF LOOP
 }// END OF MAIN

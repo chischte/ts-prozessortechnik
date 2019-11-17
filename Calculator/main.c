@@ -16,6 +16,7 @@
 #include <avr/io.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>  // used for the abs() function
 
 #define F_CPU 2000000
 #include <util/delay.h>
@@ -23,43 +24,51 @@
 #include "buttons.h"
 #include "display.h"
 
+int16_t firstLineNumber=0;
+int16_t previousFirstLineNumber= 1;
+char displayDigitLength=19;
+
 int main( void)
 {
-	// **************************************************************************
-	// SETUP
-	// **************************************************************************
-	InitButtonPort();
-	InitDisplayPort();
-	InitLcd();
-	
-	// **************************************************************************
-	// LOOP
-	// **************************************************************************
-	while(1)
-	{
-		// DRUCK AUF «PLUS» SCHREIBT EINE 1 IN FELD (0,0):
-		if(DetectPlusButtonSwitch())
-		{
-			WriteNumberToLcd( 0, 1, 1);
-		}
-		
-		// DRUCK AUF «MINUS» SCHREIBT EINE 2 IN FELD (1,0):
-		if(DetectMinusButtonSwitch())
-		{
-			WriteNumberToLcd( 1, 2, 1);
-		}
-		
-		// DRUCK AUD «ENTER» SCHREIBT EINE 3 IN FELD (2,0):
-		if(DetectEnterButtonSwitch())
-		{
-			WriteNumberToLcd( 2, 3, 1);
-		}
-		
-		// DRUCK AUF «CLEAR SCHREIBT EINE 4 IN FELD (3,0);
-		if(DetectClearButtonSwitch())
-		{
-			WriteNumberToLcd( 3, 4, 1);
-		}
-		
-	}//END OF LOOP
+  // **************************************************************************
+  // SETUP
+  // **************************************************************************
+  InitButtonPort();
+  InitDisplayPort();
+  InitLcd();
+  
+  // **************************************************************************
+  // LOOP
+  // **************************************************************************
+  while(1)
+  {
+    // DRUCK AUF «PLUS» ERHÖHT DIE ZAHLENSTELLE UM 1:
+    if(DetectPlusButtonSwitch())
+    {
+      firstLineNumber++;
+    }
+    
+    // DRUCK AUF «MINUS» VERKLEINERT DIE ZAHLENSTELLE UM 1:
+    if(DetectMinusButtonSwitch())
+    {
+      firstLineNumber--;
+    }
+    
+    // DRUCK AUF «ENTER» SPRINGT ZUR NÄCHSTEN ZAHLENSTELLE:
+    if(DetectEnterButtonSwitch())
+    {
+      
+    }
+    
+    // UPDATE DISPLAY:
+    char numberLength=CalculateNumberLength(firstLineNumber);
+    if(firstLineNumber!=previousFirstLineNumber){
+      WriteNumberToLcd( 0, firstLineNumber, numberLength); // (position,number,width)
+      previousFirstLineNumber=firstLineNumber;
+      
+      // CLEAR UNUSED DIGIT IF NUMBER OF DIGIT CHANGES:
+       WriteCharToLcd(numberLength, ' '); // (position,char)
+    }
+    
+  }//END OF LOOP
 }// END OF MAIN

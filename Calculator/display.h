@@ -14,22 +14,10 @@
 #define DISP_RS_MASK   0b00000001
 #define DISP_DATA_MASK 0b11110000
 
-char CalculateNumberLength(int16_t number)
-{
-  char numberLength=1;
-  // CALCULATE NUMBER OF DIGITS:
-  // ADD A DIGIT FOR THE MINUS:
-  if(number<0){
-    numberLength++;
-  }
-  // ADD A DIGIT FOR EVERY POWER OF 10:
-  while(abs(number)>=10){
-    number/=10;
-    numberLength++;
-  }
-  return numberLength;
-}
+// GLOBAL VARIABLE:
+uint8_t DispPos= 0;
 
+// FUNCTIONS:
 void InitDisplayPort()
 {
   PORTD.DIRSET= DISP_RS_MASK + DISP_RW_MASK + DISP_EN_MASK;
@@ -101,7 +89,6 @@ void InitLcd()
   SendCommand( 0x2);
 }
 
-uint8_t DispPos= 0;
 void MoveAndInc()
 {
   SendCommand(0x80+ DispPos);

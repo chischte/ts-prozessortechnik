@@ -27,12 +27,28 @@
 int16_t storedNumber=0;
 int16_t upperLineNumber=0;
 int8_t currentDigitValue=0;
+char noOfDigits=80;
 char currentDigitNo=0;
 bool newDigitDefined=true;
 bool storedNumberAvailable=false;
-
-char noOfDigits=80;
 bool firstEnterPush=true;
+
+// FUNCTIONS:
+char CalculateNumberLength(int16_t number)
+{
+  char numberLength=1;
+  // CALCULATE NUMBER OF DIGITS:
+  // ADD A DIGIT FOR THE MINUS:
+  if(number<0){
+    numberLength++;
+  }
+  // ADD A DIGIT FOR EVERY POWER OF 10:
+  while(abs(number)>=10){
+    number/=10;
+    numberLength++;
+  }
+  return numberLength;
+}
 
 void UpdateDisplay()
 {

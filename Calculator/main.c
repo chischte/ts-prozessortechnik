@@ -12,19 +12,18 @@
 * *****************************************************************************
 */
 
+#define F_CPU 2000000
 
 #include <avr/io.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>  // used for the abs() function
-//#include <math.h>    // used for the pow() function
-
-#define F_CPU 2000000
 #include <util/delay.h>
 
 #include "buttons.h"
 #include "display.h"
 
+// GLOBAL VARIABLES:
 int16_t storedNumber=0;
 int16_t upperLineNumber=0;
 int8_t currentDigitValue=0;
@@ -32,60 +31,46 @@ char currentDigitNo=0;
 bool newDigitDefined=true;
 bool storedNumberAvailable=false;
 
-char noOfDigitsPerLine=20;
+char noOfDigits=80;
 bool firstEnterPush=true;
-
-int32_t CalculateCurrentNumber()
-{
-  int32_t currentNumber=0;
-  
-  if (storedNumber>=0){
-    currentNumber=storedNumber*10 + currentDigitValue;
-  }
-  else{
-    currentNumber=storedNumber*10-currentDigitValue;
-  }
-  return currentNumber;
-}
 
 void UpdateDisplay()
 {
   int8_t position=0;
-  
+
   // PRINT STORED NUMBER IF AVAILABLE:
   if(storedNumberAvailable){
     char numberLength=CalculateNumberLength(storedNumber);
     WriteNumberToLcd( position, storedNumber, numberLength); // (position,number,width)
     position = CalculateNumberLength(storedNumber);
   }
-  //PRINT CURRENT DIGIT IF USED:
+  // PRINT CURRENT DIGIT IF USED:
   if(newDigitDefined)
   {
     char numberLength=CalculateNumberLength(currentDigitValue);
     WriteNumberToLcd( position, currentDigitValue, numberLength); // (position,number,width)
     position=position+numberLength;
-    // CLEAR UNUSED DIGIT IF NUMBER OF DIGIT CHANGES:
+    // CLEAR UNUSED DIGIT IF NUMBER OF DIGITS CHANGES:
     WriteCharToLcd(position, ' '); // (position,char)
   }
 }
-
 
 int main( void)
 {
   // **************************************************************************
   // SETUP
   // **************************************************************************
+  
   InitButtonPort();
   InitDisplayPort();
   InitLcd();
-  UpdateDisplay();
+  WriteCharToLcd(0, '_'); // (position,char)
   
   // **************************************************************************
   // LOOP
   // **************************************************************************
   while(1)
   {
-    
     // DRUCK AUF «PLUS» ERHÖHT DEN WERT DER AKTUELLEN ZAHLENSTELLE UM 1:
     if(DetectPlusButtonSwitch())
     {
@@ -104,7 +89,7 @@ int main( void)
     // DRUCK AUF «MINUS» VERKLEINERT DEN WERT DER AKTUELLE ZAHLENSTELLE UM 1:
     if(DetectMinusButtonSwitch())
     {
-      // BEI DER ERSTEN STELLE SIND WERTE VON -9 bis +9 ZULÄSSIG
+      // BEI DER ERSTEN STELLE SIND WERTE VON -9 bis +9 ZULÄSSIG:
       if (currentDigitNo==0){
         if(currentDigitValue>(-9)){
           currentDigitValue--;
@@ -130,12 +115,19 @@ int main( void)
     // DRUCK AUF «ENTER» SPRINGT ZUR NÄCHSTEN ZAHLENSTELLE:
     if(DetectEnterButtonSwitch())
     {
+      if(!firstEnterPush)
+      {
+        char endMessage[]="END OF PROTOTYPE 2";
+        for(int i=0;i<18;i++)
+        {
+          WriteCharToLcd(i+20, endMessage[i]); // (position,char)
+        }
+      }
       if(firstEnterPush)
       {
         if(storedNumber>=0)
         {
           storedNumber=(storedNumber*10)+currentDigitValue;
-          //storedNumber=564;
         }
         else{
           storedNumber=(storedNumber*10)-currentDigitValue;
@@ -143,15 +135,12 @@ int main( void)
         currentDigitValue=0;
         storedNumberAvailable=true;
         newDigitDefined=false;
+        // ANZEIGEN DER EINGABEAUFFORDERUNG FÜR DIE NÄCHSTE STELLE:
         char numberLength=CalculateNumberLength(storedNumber);
         WriteCharToLcd(numberLength, '_'); // (position,char)
         currentDigitNo++;
         UpdateDisplay();
         firstEnterPush=false;
-      }
-      if(!firstEnterPush)
-      {
-        //storedNumber=CalculateCurrentNumber();
       }
     }
     
@@ -162,12 +151,11 @@ int main( void)
       currentDigitNo=0;
       currentDigitValue=0;
       storedNumberAvailable=false;
-      firstEnterPush=false;
-      for(int i=0;i<noOfDigitsPerLine;i++){
+      firstEnterPush=true;
+      for(int i=0;i<noOfDigits;i++){
         WriteCharToLcd(i, ' '); // (position,char)
       }
       WriteNumberToLcd( 0, 0, 0); // (position,number,width)
     }
-    
-  }//END OF LOOP
+  }// END OF MAIN LOOP
 }// END OF MAIN

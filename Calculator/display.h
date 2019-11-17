@@ -23,14 +23,12 @@ char CalculateNumberLength(int16_t number)
     numberLength++;
   }
   // ADD A DIGIT FOR EVERY POWER OF 10:
-  
   while(abs(number)>=10){
     number/=10;
     numberLength++;
   }
   return numberLength;
 }
-
 
 void InitDisplayPort()
 {

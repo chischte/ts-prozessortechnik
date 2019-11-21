@@ -25,6 +25,8 @@
 
 enum operationStage {enterFirstOperand, enterOperation, enterSecondOperand};
 
+enum selectedOperation {add, substract, multiply, divide};
+
 
 // GLOBAL VARIABLES:
 int16_t storedNumber=0;

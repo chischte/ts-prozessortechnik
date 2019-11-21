@@ -133,11 +133,10 @@ int main( void)
     {
       if(!firstEnterPush)
       {
-        char endMessage[]="END OF PROTOTYPE 2";
-        for(int i=0;i<18;i++)
-        {
-          WriteCharToLcd(i+20, endMessage[i]); // (position,char)
-        }
+        //CALCULATE STORED NUMBER
+		//WRITE FIRST OPERAND RIGHT TO RIGHT SIDE OF LINE 1
+		WriteNumberToLcd( 0, storedNumber, 20); //pos,num,width
+		
       }
       if(firstEnterPush)
       {

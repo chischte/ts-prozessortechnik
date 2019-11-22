@@ -13,6 +13,11 @@
 */
 
 #define F_CPU 2000000
+#define plusChar 0x2b
+#define minusChar 0xb0
+#define multiplyChar 0x2a
+#define divideChar 0x3a
+
 
 #include <avr/io.h>
 #include <stdbool.h>
@@ -32,12 +37,14 @@ enum selectedOperation {add, substract, multiply, divide};
 int16_t storedNumber=0;
 int16_t firstOperand=0;
 int8_t currentDigitValue=0;
-char currentOperation=enterFirstOperand;
+char currentProgramState=enterFirstOperand;
+char currentOperand=multiply;
 char noOfDigits=80;
 char currentDigitNo=0;
 bool newDigitDefined=true;
 bool storedNumberAvailable=false;
 bool firstEnterPush=true;
+bool operandSelected=false;
 
 
 // FUNCTIONS:
@@ -90,28 +97,34 @@ void UpdateDisplay()
   }
 }
 
+
 void FlipOperands()
 {
   static char operand=0;
   if (operand==0) {
-    WriteCharToLcd(40, 0x2b); // + (position,char)
+    WriteCharToLcd(40, plusChar); // + (position,char)
+    currentOperand=add;
   }
   if(operand==1)
   {
-    WriteCharToLcd(40, 0xb0); // - (position,char)
+    WriteCharToLcd(40, minusChar); // - (position,char)
+    currentOperand=substract;
   }
   if(operand==2)
   {
-    WriteCharToLcd(40, 0x2a); // * (position,char)
+    WriteCharToLcd(40, multiplyChar); // * (position,char)
+    currentOperand=multiply;
   }
   if(operand==3)
   {
-    WriteCharToLcd(40, 0x3a); // : (position,char)
+    WriteCharToLcd(40, divideChar); // : (position,char)
+    currentOperand=divide;
   }
   operand++;
   if(operand==4){
     operand=0;
   }
+  operandSelected=true; // muss aber noch mit ENTER bestätigt werden
 }
 
 int main( void)
@@ -133,7 +146,7 @@ int main( void)
     // DRUCK AUF «PLUS» ERHÖHT DEN WERT DER AKTUELLEN ZAHLENSTELLE UM 1:
     if(DetectPlusButtonSwitch())
     {
-      switch(currentOperation){
+      switch(currentProgramState){
         
         case enterFirstOperand:
         // DRÜCKEN DER PLUS TASTE ERZEUGT WERTE VON 0 BIS 9
@@ -155,7 +168,7 @@ int main( void)
     // DRUCK AUF «MINUS» VERKLEINERT DEN WERT DER AKTUELLE ZAHLENSTELLE UM 1:
     if(DetectMinusButtonSwitch())
     {
-      switch(currentOperation){
+      switch(currentProgramState){
         
         case enterFirstOperand:
         // BEI DER ERSTEN STELLE SIND WERTE VON -9 bis +9 ZULÄSSIG:
@@ -189,7 +202,7 @@ int main( void)
     // DRUCK AUF «ENTER» SPRINGT ZUR NÄCHSTEN ZAHLENSTELLE:
     if(DetectEnterButtonSwitch())
     {
-      switch(currentOperation){
+      switch(currentProgramState){
         
         case enterFirstOperand:
         if(firstEnterPush)
@@ -214,7 +227,7 @@ int main( void)
           // PREPARE FOR OPERATION STAGE "enterOperand":
           storedNumber=0;
           storedNumberAvailable=false;
-          currentOperation=enterOperation;
+          currentProgramState=enterOperation;
           // EINGEABEAUFFORDERUNG FÜR OPERATOR (1-*/) ANZEIGEN
           WriteCharToLcd(40, 0xff); // (position,char)
         }

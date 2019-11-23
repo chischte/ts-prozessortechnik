@@ -10,6 +10,8 @@
 * Michael Wettstein
 * November 2019, Zürich
 * *****************************************************************************
+* htts://github.com/chischte/ts-prozessortechnik/tree/master/Calculator
+* *****************************************************************************
 */
 
 #define F_CPU 2000000
@@ -35,29 +37,29 @@
 #include <stdlib.h>  // für die abs() funktion
 #include <util/delay.h>
 
-#include "buttons.h" // unsauberes Verwenden von header Files, kompiliert fehlerfrei
-#include "display.h" // unsauberes Verwenden von header Files, kompiliert fehlerfrei
+// NICHT GANZ KORREKTES VERWENDEN VON HEADER FILES ZUR STRUKTURIERUNG DES CODES:
+// KOMPILIERT FEHLERFEI
+#include "buttons.h"
+#include "display.h"
 
 enum operationStage {enterFirstOperand, enterOperation, enterSecondOperand, showResult};
 enum selectedOperation {add, substract, multiply, divide};
 
-
 // GLOBAL VARIABLES:
-int16_t storedNumber=0;
-int16_t firstOperand=0;
-int16_t secondOperand=0;
-int16_t result=0;
-int8_t currentDigitValue=0;
-char currentProgramState=enterFirstOperand;
-char currentOperand=multiply; // zm Beispiel
-char currentOperandChar;
-char currentDigitNo=0;
 
 bool newDigitDefined=true;
 bool storedNumberAvailable=false;
 bool firstEnterPush=true;
 bool operandSelected=false;
-
+char currentProgramState=enterFirstOperand;
+char currentOperand=multiply; // z.B.
+char currentOperandChar;
+char currentDigitNo=0;
+int8_t currentDigitValue=0;
+int16_t storedNumber=0;
+int16_t firstOperand=0;
+int16_t secondOperand=0;
+int16_t result=0;
 
 // FUNCTIONS:
 
@@ -65,7 +67,6 @@ bool operandSelected=false;
 char CalculateNumberLength(int16_t number)
 {
   char numberLength=1;
-  
   // EINE STELLE FÜR DAS MINUS HINZUFÜGEN:
   if(number<0){
     numberLength++;
@@ -93,7 +94,7 @@ int16_t UpdateStoredNumber(){
 void ClearScreen()
 {
   for(int i=0;i<0x68;i++){
-    WriteCharToLcd(i, charClear); // (position,char)
+    WriteCharToLcd(i, charClear); // position,char
   }
 }
 
@@ -117,11 +118,12 @@ void UpdateDisplay()
     char numberLength=CalculateNumberLength(currentDigitValue);
     WriteNumberToLcd( position, currentDigitValue, numberLength); // (position,number,width)
     position=position+numberLength;
-    // BEI VORZEICHENWECHSEL NICHT VERWENDETE STELLE LÖSCHEN:
-    WriteCharToLcd(position, charClear); // (position,char)
+    // BEI VORZEICHENWECHSEL NICHT VERWENDETE STELLE CLEAREN:
+    WriteCharToLcd(position, charClear); // position,char
   }
 }
 
+// MANAGEN DES ÜBERLAUFS BEI AUSWAHL EINES DIGITS:
 void FlipCurrentDigit(int step){ // step = -1 oder +1
   currentDigitValue+=step;
   
@@ -142,34 +144,36 @@ void FlipCurrentDigit(int step){ // step = -1 oder +1
   UpdateDisplay();
 }
 
+// ZWISCHEN DEN MÖGLICHEN OPERANDEN WECHSELN:
 void FlipOperands()
 {
   static char operand=0;
   if (operand==0) {
-    currentOperandChar=charPlus;
     currentOperand=add;
+    currentOperandChar=charPlus;
   }
   if(operand==1)
   {
-    currentOperandChar=charMinus;
     currentOperand=substract;
+    currentOperandChar=charMinus;
   }
   if(operand==2)
   {
-    currentOperandChar=charMultiply;
+    
     currentOperand=multiply;
+    currentOperandChar=charMultiply;
   }
   if(operand==3)
   {
-    currentOperandChar=charDivide;
     currentOperand=divide;
+    currentOperandChar=charDivide;
   }
-  WriteCharToLcd(40, currentOperandChar); // (position,char)
+  WriteCharToLcd(40, currentOperandChar); // position,char
   operand++;
   if(operand==4){
     operand=0;
   }
-  operandSelected=true; // muss aber noch mit Enter bestätigt werden
+  operandSelected=true; // bestätigen mit Enter jezt möglich
 }
 
 void CalculateResult(){
@@ -195,7 +199,8 @@ int main( void)
   InitButtonPort();
   InitDisplayPort();
   InitLcd();
-  WriteCharToLcd(0, charFull); // (position,char)
+  // EINGABEAUFFORDERUNG:
+  WriteCharToLcd(0, charFull); // position,char
   // **************************************************************************
   // LOOP
   // **************************************************************************
@@ -239,20 +244,20 @@ int main( void)
         // SPRINGT ZUR NÄCHSTEN ZAHLENSTELLE:
         if(firstEnterPush)
         {
+          // BESTÄTIGEN DES EINGEGEBEN DIGIT WERTS:
           storedNumber=UpdateStoredNumber();
-          currentDigitValue=0;
           storedNumberAvailable=true;
+          currentDigitValue=0;
           newDigitDefined=false;
           // ANZEIGEN DER EINGABEAUFFORDERUNG FÜR DIE NÄCHSTE STELLE:
           char numberLength=CalculateNumberLength(storedNumber);
-          WriteCharToLcd(displStartFirstLine+numberLength, charFull); // (position,char)
+          WriteCharToLcd(displStartFirstLine+numberLength, charFull); // position,char
           currentDigitNo++;
           UpdateDisplay();
           firstEnterPush=false;
         }
         else{ // SECOND ENTER PUSH:
-          // BESTÄTIGEN DER GESPEICHERTEN ZAHL ALS ERSTEN OPERANDEN:
-          // ANZEIGEN DES ERSTEN OPERANDEN:
+          // BESTÄTIGEN UND ANZEIGEN DER GESPEICHERTEN ZAHL ALS ERSTEN OPERANDEN:
           firstOperand=storedNumber;
           WriteNumberToLcd( displStartFirstLine, firstOperand, displDigitsPerLine); //pos,num,width
           // VORBEREITEN FÜR OPERATION STAGE "enterOperand":
@@ -263,19 +268,16 @@ int main( void)
           firstEnterPush=true;
           currentProgramState++;
           // EINGEABEAUFFORDERUNG FÜR OPERATOR (1-*:) ANZEIGEN
-          if(currentProgramState==enterOperation)
-          {
-            WriteCharToLcd(displStartSecondLine, charFull); // (position,char)
-          }
+          WriteCharToLcd(displStartSecondLine, charFull); // position,char
         }
         break;
         case enterOperation:
         if(operandSelected){
           // OPERATOR ANZEIGEN:
-          WriteCharToLcd(displStartSecondLine, charClear); // (position,char)
-          WriteCharToLcd(displEndOfSecondLine, currentOperandChar); // (position,char)
+          WriteCharToLcd(displStartSecondLine, charClear); // position,char
+          WriteCharToLcd(displEndOfSecondLine, currentOperandChar); // position,char
           // EINGABEAUFFORDERUNG FÜR ZWEITEN OPERANDEN:
-          WriteCharToLcd(displStartThirdLine, charFull); // (position,char)
+          WriteCharToLcd(displStartThirdLine, charFull); // position,char
           currentProgramState++;
         }
         break;
@@ -289,7 +291,7 @@ int main( void)
           newDigitDefined=false;
           // ANZEIGEN DER EINGABEAUFFORDERUNG FÜR DIE NÄCHSTE STELLE:
           char numberLength=CalculateNumberLength(storedNumber);
-          WriteCharToLcd(displStartThirdLine+numberLength, charFull); // (position,char)
+          WriteCharToLcd(displStartThirdLine+numberLength, charFull); // position,char
           
           currentDigitNo++;
           UpdateDisplay();
@@ -305,7 +307,7 @@ int main( void)
           currentProgramState++;
           // RESULTAT BERECHNEN UND ANZEIGEN:
           CalculateResult();
-          WriteNumberToLcd( displStartFourthLine, result, displDigitsPerLine); //pos,num,width
+          WriteNumberToLcd( displStartFourthLine, result, displDigitsPerLine); // pos,num,width
           firstEnterPush=false;
           break;
           case showResult:
@@ -313,7 +315,7 @@ int main( void)
           ClearScreen();
           firstOperand=result;
           WriteNumberToLcd( displStartFirstLine,firstOperand, displDigitsPerLine); // pos,num,width
-          WriteCharToLcd(displStartSecondLine, charFull); // (position,char)
+          WriteCharToLcd(displStartSecondLine, charFull); // position,char
           secondOperand=0;
           firstEnterPush=true;
           storedNumber=0;
@@ -341,7 +343,7 @@ int main( void)
       operandSelected=false;
       currentProgramState=enterFirstOperand;
       ClearScreen();
-      WriteCharToLcd(displStartFirstLine, charFull); // (position,char)
+      WriteCharToLcd(displStartFirstLine, charFull); // position,char
     }
   }// END OF MAIN LOOP
 }// END OF MAIN

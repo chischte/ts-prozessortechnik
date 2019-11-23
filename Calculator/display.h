@@ -2,7 +2,7 @@
 * display.h
 *
 * Created: 08/11/2019 23:11:56
-*  Author: Michael Wettstein
+*  Author: Michael Wettstein & Copy Paster
 */
 
 #ifndef DISPLAY_H_

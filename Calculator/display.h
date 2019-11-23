@@ -119,6 +119,7 @@ void WriteChar( uint8_t c)
 
 void WriteNumberToLcd( int8_t position, int16_t number, int8_t width)
 {
+//int16_t numberToDestroy=number;
   if( width< 0)
   {
     width= 0;

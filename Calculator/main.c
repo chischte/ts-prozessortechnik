@@ -2,7 +2,7 @@
 * *****************************************************************************
 * CALCULATOR
 * *****************************************************************************
-* A simple program in C to add a calculator functionality to a prototyping
+* Program in C to add a calculator functionality to a prototyping
 * board "EduBoard" as part of a school work.
 * The code is written to be uploaded to an ATxmega128A3U AVR microcontroller.
 * The User interface consists of 4 push buttons and a 4x20 digits display.
@@ -28,8 +28,6 @@
 #define displStartFourthLine 0x54
 #define displEndOfFourthLine 0x67
 
-
-
 #include <avr/io.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -40,7 +38,6 @@
 #include "display.h"
 
 enum operationStage {enterFirstOperand, enterOperation, enterSecondOperand, showResult};
-
 enum selectedOperation {add, substract, multiply, divide};
 
 
@@ -51,9 +48,8 @@ int16_t secondOperand=0;
 int16_t result=0;
 int8_t currentDigitValue=0;
 char currentProgramState=enterFirstOperand;
-char currentOperand=multiply;
+char currentOperand=multiply; // for example
 char currentOperandChar;
-char noOfDigits=0x68;
 char currentDigitNo=0;
 
 bool newDigitDefined=true;
@@ -94,7 +90,7 @@ int16_t UpdateStoredNumber(){
 void ClearScreen()
 {
   // CLEAR SCREEN:
-  for(int i=0;i<noOfDigits;i++){
+  for(int i=0;i<0x68;i++){
     WriteCharToLcd(i, charClear); // (position,char)
   }
 }
@@ -124,15 +120,12 @@ void UpdateDisplay()
   }
 }
 
-
 void FlipCurrentDigit(int step){ //steps are -1 or +1
   currentDigitValue+=step;
   
   if(currentDigitValue>9){
     currentDigitValue=0;
   }
-  
-  
   if (currentDigitNo==0){ //das erste Digit kann negativ sein
     if(currentDigitValue<(-9)){
       currentDigitValue=0;
@@ -141,14 +134,11 @@ void FlipCurrentDigit(int step){ //steps are -1 or +1
   else{ // die folgenden Digits müssen mindestens 0 Sein
     if(currentDigitValue<0)
     currentDigitValue=9;
-    
   }
-
   newDigitDefined=true;
   firstEnterPush=true;
   UpdateDisplay();
 }
-
 
 void FlipOperands()
 {
@@ -170,7 +160,6 @@ void FlipOperands()
   if(operand==3)
   {
     currentOperandChar=charMultiply;
-    
     currentOperand=divide;
   }
   WriteCharToLcd(40, currentOperandChar); // : (position,char)
@@ -276,14 +265,12 @@ int main( void)
           if(currentProgramState==enterFirstOperand)
           {
             firstOperand=storedNumber;
-            int16_t numberToPrint=firstOperand; // notwendig, folgender Befehl macht die Nummer kaputt
-            WriteNumberToLcd( displStartFirstLine, numberToPrint, 20); //pos,num,width
+            WriteNumberToLcd( displStartFirstLine, firstOperand, 20); //pos,num,width
           }
           if(currentProgramState==enterSecondOperand)
           {
             secondOperand=storedNumber;
-            int16_t numberToPrint=secondOperand; // notwendig, folgender Befehl macht die Nummer kaputt
-            WriteNumberToLcd( displStartThirdLine, numberToPrint, 20); //pos,num,width
+            WriteNumberToLcd( displStartThirdLine, secondOperand, 20); //pos,num,width
           }
           
           // PREPARE FOR OPERATION STAGE "enterOperand":
@@ -319,8 +306,7 @@ int main( void)
           // SET RESULT AS FIRST OPERAND AND PREPARE VARIABLES:
           ClearScreen();
           firstOperand=result;
-          int16_t numberToPrint=firstOperand;
-          WriteNumberToLcd( displStartFirstLine, numberToPrint, 20); //pos,num,width
+          WriteNumberToLcd( displStartFirstLine,firstOperand, 20); //pos,num,width
           WriteCharToLcd(displStartSecondLine, charFull); // (position,char)
           secondOperand=0;
           firstEnterPush=true;
@@ -334,7 +320,6 @@ int main( void)
           currentProgramState=enterOperation;
         }
         break;
-
       }
     }
 
@@ -351,6 +336,7 @@ int main( void)
       operandSelected=false;
       currentProgramState=enterFirstOperand;
       ClearScreen();
+      WriteCharToLcd(displStartFirstLine, charFull); // (position,char)
       //WriteNumberToLcd( 0, 0, 0); // (position,number,width)
     }
   }// END OF MAIN LOOP

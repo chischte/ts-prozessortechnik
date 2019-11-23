@@ -18,6 +18,7 @@
 #define charMultiply 0x2a
 #define charDivide 0x3a
 #define charClear 0xa0
+#define charFull 0xff
 #define displStartFirstLine 0x00
 #define displEndOfFirstLine 0x13
 #define displStartSecondLine 0x40
@@ -38,7 +39,7 @@
 #include "buttons.h"
 #include "display.h"
 
-enum operationStage {enterFirstOperand, enterOperation, enterSecondOperand};
+enum operationStage {enterFirstOperand, enterOperation, enterSecondOperand, showResult};
 
 enum selectedOperation {add, substract, multiply, divide};
 
@@ -47,11 +48,12 @@ enum selectedOperation {add, substract, multiply, divide};
 int16_t storedNumber=0;
 int16_t firstOperand=0;
 int16_t secondOperand=0;
+int16_t result=0;
 int8_t currentDigitValue=0;
 char currentProgramState=enterFirstOperand;
 char currentOperand=multiply;
 char currentOperandChar;
-char noOfDigits=80;
+char noOfDigits=0x68;
 char currentDigitNo=0;
 
 bool newDigitDefined=true;
@@ -89,6 +91,14 @@ int16_t UpdateStoredNumber(){
   return newStoredNumber;
 }
 
+void ClearScreen()
+{
+  // CLEAR SCREEN:
+  for(int i=0;i<noOfDigits;i++){
+    WriteCharToLcd(i, charClear); // (position,char)
+  }
+}
+
 void UpdateDisplay()
 {
   int8_t position=0;
@@ -113,6 +123,32 @@ void UpdateDisplay()
     WriteCharToLcd(position, charClear); // (position,char)
   }
 }
+
+
+void FlipCurrentDigit(int step){ //steps are -1 or +1
+  currentDigitValue+=step;
+  
+  if(currentDigitValue>9){
+    currentDigitValue=0;
+  }
+  
+  
+  if (currentDigitNo==0){ //das erste Digit kann negativ sein
+    if(currentDigitValue<(-9)){
+      currentDigitValue=0;
+    }
+  }
+  else{ // die folgenden Digits müssen mindestens 0 Sein
+    if(currentDigitValue<0)
+    currentDigitValue=9;
+    
+  }
+
+  newDigitDefined=true;
+  firstEnterPush=true;
+  UpdateDisplay();
+}
+
 
 void FlipOperands()
 {
@@ -145,6 +181,21 @@ void FlipOperands()
   operandSelected=true; // muss aber noch mit ENTER bestätigt werden
 }
 
+void CalculateResult(){
+  if(currentOperand==add){
+    result=firstOperand+secondOperand;
+  }
+  if(currentOperand==substract){
+    result=firstOperand-secondOperand;
+  }
+  if(currentOperand==multiply){
+    result=firstOperand*secondOperand;
+  }
+  if(currentOperand==divide){
+    result=firstOperand/secondOperand;
+  }
+}
+
 int main( void)
 {
   // **************************************************************************
@@ -154,7 +205,7 @@ int main( void)
   InitButtonPort();
   InitDisplayPort();
   InitLcd();
-  WriteCharToLcd(0, '_'); // (position,char)
+  WriteCharToLcd(0, charFull); // (position,char)
   
   // **************************************************************************
   // LOOP
@@ -169,15 +220,7 @@ int main( void)
         case enterFirstOperand:
         case enterSecondOperand: // gleiches Verhalten in beiden Cases!
         // DRÜCKEN DER PLUS TASTE ERZEUGT WERTE VON 0 BIS 9
-        if(currentDigitValue<9){
-          currentDigitValue++;
-        }
-        else{
-          currentDigitValue=0;
-        }
-        newDigitDefined=true;
-        firstEnterPush=true;
-        UpdateDisplay();
+        FlipCurrentDigit(+1);
         break;
         case enterOperation:
         FlipOperands();
@@ -192,26 +235,7 @@ int main( void)
         case enterFirstOperand:
         case enterSecondOperand:
         // BEI DER ERSTEN STELLE SIND WERTE VON -9 bis +9 ZULÄSSIG:
-        if (currentDigitNo==0){
-          if(currentDigitValue>(-9)){
-            currentDigitValue--;
-          }
-          else{
-            currentDigitValue=0;
-          }
-        }
-        // BEI DEN NACHFOLGENDEN STELLEN SIND WERTE VON 0 BIS 9 ZULÄSSIG
-        if (currentDigitNo>0){
-          if(currentDigitValue>0){
-            currentDigitValue--;
-          }
-          else{
-            currentDigitValue=9;
-          }
-        }
-        newDigitDefined=true;
-        firstEnterPush=true;
-        UpdateDisplay();
+        FlipCurrentDigit(-1);
         break;
         
         case enterOperation:
@@ -248,17 +272,18 @@ int main( void)
         }
         else{ // SECOND ENTER PUSH:
           // BESTÄTIGEN DER GESPEICHERTEN ZAHL ALS ERSTEN OPERANDEN:
-          firstOperand=storedNumber;
           // ANZEIGEN DES ERSTEN OPERANDEN:
           if(currentProgramState==enterFirstOperand)
           {
             firstOperand=storedNumber;
-            WriteNumberToLcd( displStartFirstLine, firstOperand, 20); //pos,num,width
+            int16_t numberToPrint=firstOperand; // notwendig, folgender Befehl macht die Nummer kaputt
+            WriteNumberToLcd( displStartFirstLine, numberToPrint, 20); //pos,num,width
           }
           if(currentProgramState==enterSecondOperand)
           {
             secondOperand=storedNumber;
-            WriteNumberToLcd( displStartThirdLine, secondOperand, 20); //pos,num,width
+            int16_t numberToPrint=secondOperand; // notwendig, folgender Befehl macht die Nummer kaputt
+            WriteNumberToLcd( displStartThirdLine, numberToPrint, 20); //pos,num,width
           }
           
           // PREPARE FOR OPERATION STAGE "enterOperand":
@@ -266,16 +291,48 @@ int main( void)
           storedNumberAvailable=false;
           currentDigitNo=0;
           newDigitDefined=false;
+          firstEnterPush=true;
           currentProgramState++;
           // EINGEABEAUFFORDERUNG FÜR OPERATOR (1-*/) ANZEIGEN
-          WriteCharToLcd(40, 0xff); // (position,char)
+          if(currentProgramState==enterOperation)
+          {
+            WriteCharToLcd(displStartSecondLine, charFull); // (position,char)
+          }
         }
         break;
         
         case enterOperation:
-        WriteCharToLcd(displStartSecondLine, charClear); // : (position,char)
-        WriteCharToLcd(displEndOfSecondLine, currentOperandChar); // : (position,char)
-        currentProgramState++;
+        if(operandSelected){
+          WriteCharToLcd(displStartSecondLine, charClear); // : (position,char)
+          WriteCharToLcd(displEndOfSecondLine, currentOperandChar); // : (position,char)
+          currentProgramState++;
+        }
+        break;
+        
+        case showResult:
+        if(firstEnterPush){
+          CalculateResult();
+          WriteNumberToLcd( displStartFourthLine, result, 20); //pos,num,width
+          firstEnterPush=false;
+        }
+        else{ // SECOND ENTER PUSH:
+          // SET RESULT AS FIRST OPERAND AND PREPARE VARIABLES:
+          ClearScreen();
+          firstOperand=result;
+          int16_t numberToPrint=firstOperand;
+          WriteNumberToLcd( displStartFirstLine, numberToPrint, 20); //pos,num,width
+          WriteCharToLcd(displStartSecondLine, charFull); // (position,char)
+          secondOperand=0;
+          firstEnterPush=true;
+          storedNumber=0;
+          currentDigitNo=0;
+          currentDigitValue=0;
+          storedNumberAvailable=false;
+          newDigitDefined=false;
+          firstEnterPush=true;
+          operandSelected=false;
+          currentProgramState=enterOperation;
+        }
         break;
 
       }
@@ -293,11 +350,8 @@ int main( void)
       firstEnterPush=true;
       operandSelected=false;
       currentProgramState=enterFirstOperand;
-      // CLEAR SCREEN:
-      for(int i=0;i<noOfDigits;i++){
-        WriteCharToLcd(i, charClear); // (position,char)
-      }
-      WriteNumberToLcd( 0, 0, 0); // (position,number,width)
+      ClearScreen();
+      //WriteNumberToLcd( 0, 0, 0); // (position,number,width)
     }
   }// END OF MAIN LOOP
 }// END OF MAIN
